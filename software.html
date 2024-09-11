@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        input {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background: #007bff;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .hidden {
+            display: none;
+        }
+        .item-list {
+            margin-top: 10px;
+            width: 100%;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Registro de Inventario</h1>
+        <p id="dateInfo"></p>
+        <div id="items">
+            <!-- Se agregarán dinámicamente los campos de código y cantidad -->
+        </div>
+        <button onclick="addItem()">Agregar Código</button>
+        <div class="item-list">
+            <h2>Listado de Ítems</h2>
+            <ul id="itemList">
+                <!-- La lista de ítems se actualizará aquí -->
+            </ul>
+        </div>
+        <div class="result hidden" id="result">
+            <p id="resultText"></p>
+            <button onclick="finish()">Finalizar y Enviar</button>
+        </div>
+    </div>
+
+    <script>
+        // Mostrar la fecha actual en la página
+        const now = new Date();
+        document.getElementById('dateInfo').textContent = `Fecha actual: ${now.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} ${now.toLocaleTimeString('es-ES')}`;
+
+        function addItem() {
+            const code = prompt('Ingrese el código de 6 dígitos:');
+            const quantity = prompt('Ingrese la cantidad (1 o 2 dígitos):');
+
+            if (code && quantity && /^[0-9]{6}$/.test(code) && /^[0-9]{1,2}$/.test(quantity)) {
+                const itemList = document.getElementById('itemList');
+                const listItem = document.createElement('li');
+
+                listItem.innerHTML = `
+                    Código: ${code}, Cantidad: ${quantity}
+                `;
+
+                itemList.appendChild(listItem);
+
+                // Mostrar el botón de finalizar si hay al menos un ítem
+                document.getElementById('result').classList.remove('hidden');
+            } else {
+                alert('Por favor, ingrese un código válido y una cantidad válida.');
+            }
+        }
+
+        function finish() {
+            const items = Array.from(document.getElementById('itemList').children);
+            if (items.length === 0) {
+                alert('No hay ítems para finalizar.');
+                return;
+            }
+
+            const codes = items.map(item => item.textContent.split(',')[0].split(': ')[1].trim());
+            const quantities = items.map(item => item.textContent.split(',')[1].split(': ')[1].trim());
+            const date = new Date().toLocaleString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' });
+
+            const queryString = codes.map((code, index) => `code=${code}&quantity=${quantities[index]}`).join('&');
+            window.location.href = `confirm.html?${queryString}&date=${encodeURIComponent(date)}`;
+        }
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Confirmación de Inventario</h1>
+        <p id="confirmationText"></p>
+    </div>
+
+    <script>
+        function getQueryParams() {
+            const query = window.location.search.substring(1);
+            const pairs = query.split('&');
+            const params = {};
+            pairs.forEach(pair => {
+                const [key, value] = pair.split('=');
+                params[decodeURIComponent(key)] = decodeURIComponent(value);
+            });
+            return params;
+        }
+
+        const params = getQueryParams();
+        const date = params.date;
+
+        let resultText = `Fecha y Hora de Finalización: ${date}\n\n`;
+
+        Object.keys(params).forEach(key => {
+            if (key.startsWith('code')) {
+                const index = key.replace('code', '');
+                const code = params[key];
+                const quantity = params[`quantity${index}`];
+                resultText += `Código: ${code}, Cantidad: ${quantity}\n`;
+            }
+        });
+
+        document.getElementById('confirmationText').textContent = resultText;
+    </script>
+</body>
+</html>
