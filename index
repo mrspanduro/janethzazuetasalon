@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Página Web</title>
+    <link rel="stylesheet" href="style.css"> <!-- Vincula tu archivo CSS -->
+</head>
+<body>
+    <header>
+        <h1>Bienvenidos a Mi Página Web</h1>
+    </header>
+    <nav>
+        <a href="#">Inicio</a>
+        <a href="#">Servicios</a>
+        <a href="#">Contacto</a>
+    </nav>
+    <div class="container">
+        <p>Este es un ejemplo de mi página web alojada en GitHub Pages.</p>
+    </div>
+    <script src="script.js"></script> <!-- Vincula tu archivo JavaScript -->
+</body>
+</html>
